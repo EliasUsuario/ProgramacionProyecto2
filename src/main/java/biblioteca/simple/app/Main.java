@@ -17,8 +17,10 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+// Clase principal de la aplicacion de consola para la gestion de una biblioteca.
 public class Main {
 
+    // Atributos
     private static final Catalogo catalogo = new Catalogo();
 
     private static final List<Usuario> usuarios =new ArrayList<>();
@@ -30,6 +32,7 @@ public class Main {
         menu();
     }
 
+    //Carga del conjunto de productos y usuarios iniciales en la aplicación.
     private static void cargarDatos(){
     
         catalogo.alta(new Libro(1, "El Quijote", "1608", Formato.FISICO, "25225", "Cervantes"));
@@ -40,12 +43,15 @@ public class Main {
         catalogo.alta(new Videojuego(6, "Sonic", "2021", Formato.DIGITAL, Plataforma.NINTENDO, 6, "Sega", 8.00));
         catalogo.alta(new Videojuego(7, "Mario", "2023", Formato.DIGITAL, Plataforma.XBOX, 9, "Nintendo", 8.34));
 
+        //Carga de usuarios iniciales
+
         usuarios.add(new Usuario(1, "Juan"));
         usuarios.add(new Usuario(2, "María"));
 
     }
 
-private static void menu(){
+    //Menu principal de la aplicacion
+    private static void menu(){
         int op;
         do {
             System.out.println("\n***Menú de Biblioteca***");
@@ -62,6 +68,7 @@ private static void menu(){
             while(!sc.hasNextInt()) sc.next();
             op = sc.nextInt();
             sc.nextLine();
+            sc.close(); //Cierre del scanner
 
             switch (op){
                 case 1 -> listar();
@@ -78,6 +85,7 @@ private static void menu(){
         } while(op != 0);
     }
 
+    //Listar todos los productos
     private static void listar(){
         List<Producto> lista = catalogo.listar();
         if(lista.isEmpty()){
@@ -88,12 +96,14 @@ private static void menu(){
         for(Producto p : lista) System.out.println("- " + p);
     }
 
+    //Buscar productos por titulo
     private static void buscarPorTitulo(){
         System.out.println("Título (escribe parte del título): ");
         String t = sc.nextLine();
         catalogo.buscar(t).forEach(p -> System.out.println("- " + p));
     }
 
+    //Buscar productos por año
     private static void buscarPorAnio(){
         System.out.println("Año: ");
         while(!sc.hasNextInt()) sc.next();
@@ -102,6 +112,7 @@ private static void menu(){
         catalogo.buscar(a).forEach(p -> System.out.println("- " + p));
     }
 
+    //Listar todos los usuarios
     private static void listarUsuarios(){
         if (usuarios.isEmpty()) {
             System.out.println("No hay usuarios registrados");
@@ -113,6 +124,7 @@ private static void menu(){
         );
     }
 
+    //Devuelve un usuario por su codigo
     private static Usuario getUsuarioPorCodigo(int id){
         return usuarios.stream()
                 .filter(u -> u.getId() == id)
@@ -120,9 +132,10 @@ private static void menu(){
                 .orElse(null);
     }
 
+    //Prestar un producto
     private static void prestar(){
 
-        // 1)mostrar productos disponibles
+// 1)Mostrar productos disponibles
 
         List<Producto> disponibles = catalogo.listar().stream()
                 .filter(p -> p instanceof Prestable pN && !pN.estaPrestado())
@@ -142,6 +155,7 @@ private static void menu(){
         int id = sc.nextInt();
         sc.nextLine();
 
+// 2)Buscar el producto por id
         Producto pEncontrado = disponibles.stream()
         .filter(p -> {
             try {
@@ -153,6 +167,7 @@ private static void menu(){
         .findFirst()
         .orElse(null);
 
+// 3)Comprobar si el producto existe
         if (pEncontrado == null){
             System.out.println("El id no existe");
             return;
@@ -171,8 +186,7 @@ private static void menu(){
             sc.nextLine();
             switch (opcion) {
                 case 1 -> {
-                    // El caso 1 es exactamente como lo teníamos antes. Si el código introducido encaja con algún
-                    // usuario, el préstamo se realiza a ese usuario, en caso contrario se cierra el préstamo.
+// 4)Mostrar usuarios
                     listarUsuarios();
 
                     System.out.println("Ingresa código de usuario");
@@ -188,6 +202,7 @@ private static void menu(){
                     }
                 }
                 case 2 -> {
+// 5)Crear un nuevo usuario
                     u1 = crearUsuario();
                 }
                 case 3 -> {
@@ -198,11 +213,12 @@ private static void menu(){
             }
         }while(!(opcion == 1 || opcion == 2));
 
+// 6)Prestar el producto
         Prestable pPrestable = (Prestable) pEncontrado;
         pPrestable.prestar(u1);
     }
 
-
+//Devolver un producto
     public static void devolver(){
         List<Producto> pPrestados = catalogo.listar().stream()
                 .filter(p -> p instanceof Prestable pN && pN.estaPrestado())
@@ -212,10 +228,11 @@ private static void menu(){
             System.out.println("No hay productos prestados");
             return;
         }
-
+// 2)Mostrar productos prestados
         System.out.println("-- PRODUCTOS PRESTADOS --");
         pPrestados.forEach( p -> System.out.println("- ID: " + p.getId() + " | " + p));
 
+// 3)Buscar el producto por id
         System.out.println("Escribe el id del producto: ");
         while(!sc.hasNextInt()) sc.next();
         int id = sc.nextInt();
@@ -237,7 +254,7 @@ private static void menu(){
             System.out.println("El id no existe");
             return;
         }
-
+// 5)Devolver el producto
         Prestable pE = (Prestable) pEncontrado;
         pE.devolver();
         System.out.println("Devuelto correctamente");
@@ -246,11 +263,11 @@ private static void menu(){
 
     public static Usuario crearUsuario() {
         System.out.println("¿Cuál es el nombre del nuevo usuario?");
-        // Aunque el nombre ya exista no lo comprobamos porque puede haber dos usuarios con el mismo nombre
+// Aunque el nombre ya exista no lo comprobamos porque puede haber dos usuarios con el mismo nombre
         String nombre = sc.nextLine();
 
         int id;
-        // Sin embargo, sí comprobamos el "id" del usuario porque este es único
+// Sin embargo, sí comprobamos el "id" del usuario porque este es único
         boolean idValido;
         do {
             idValido = true;
@@ -266,6 +283,7 @@ private static void menu(){
                 }
             }
         } while (!idValido);
+// 6)Crear el usuario
         Usuario nuevoUsuario = new Usuario(id, nombre);
         usuarios.add(nuevoUsuario);
         System.out.println("Usuario " + nombre + " con código " + id + " creado correctamente.");
@@ -274,6 +292,7 @@ private static void menu(){
 
     private static void exportarUsuarios() {
         try {
+//Exportar usuarios
             SocioUsuario.exportar(usuarios);
             System.out.println("Usuarios exportados correctamente.");
         } catch (Exception e) {
@@ -283,6 +302,7 @@ private static void menu(){
 
     private static void importarUsuarios() {
         try {
+//Importar usuarios
             List<Usuario> cargados = SocioUsuario.importar();
             usuarios.clear();
             usuarios.addAll(cargados);
