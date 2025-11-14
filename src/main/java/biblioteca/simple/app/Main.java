@@ -11,6 +11,7 @@ import biblioteca.simple.servicios.Catalogo;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileReader;
@@ -28,10 +29,12 @@ public class Main {
     private static final String RUTA_JSON = "usuarios.json";
 public static void main(String[] args) {
 
-        // 1) Intentar importar usuarios desde JSON
+// 1) Intentar importar usuarios desde JSON
+
         importarUsuarios();
 
-        // Si no hay usuarios en memoria, cargamos datos por defecto
+// Si no hay usuarios en memoria, cargamos datos por defecto
+
         if (usuarios.isEmpty()) {
             cargarDatos();
         }
@@ -126,9 +129,9 @@ private static void menu(){
                 .orElse(null);
     }
 
-    /**
-     * Opción para crear usuario manualmente (menú).
-     */
+
+//Opción para crear usuario manualmente (menú).
+
     private static void crearUsuarioManual() {
         System.out.println("Crear nuevo usuario - Introduce código (int): ");
         while(!sc.hasNextInt()) {
@@ -269,7 +272,7 @@ private static void menu(){
         }
     }
 
-     private static void exportarUsuarios() {
+    private static void exportarUsuarios() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileWriter fw = new FileWriter(RUTA_JSON)) {
             gson.toJson(usuarios, fw);
