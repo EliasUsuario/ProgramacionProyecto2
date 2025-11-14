@@ -48,8 +48,8 @@ public static void main(String[] args) {
         catalogo.alta(new Pelicula(3, "El Padrino", "1972", Formato.FISICO, "rancis Ford Coppola", 175));
         catalogo.alta(new Pelicula(4, "Parásitos", "2019", Formato.FISICO, "Bong Joon-ho", 132));
 
-        catalogo.alta(new Videojuego(5, "Super Mario", "2020", Formato.DIGITAL, "Nintendo Switch", "Aventura"));
-        catalogo.alta(new Videojuego(6, "Super Mario2", "2022", Formato.DIGITAL, "Nintendo Switch", "Aventura"));
+        catalogo.alta(new Videojuego(5, "Super Mario", "2020", Formato.DIGITAL, "Nintendo Switch", 0, "Aventura", 0));
+        catalogo.alta(new Videojuego(6, "Super Mario2", "2022", Formato.DIGITAL, "Nintendo Switch", 0, "Aventura", 0));
 
 
         usuarios.add(new Usuario(1, "Juan"));
@@ -154,6 +154,7 @@ private static void menu(){
         }
 
         usuarios.add(new Usuario(codigo, nombre));
+        exportarUsuarios();
         System.out.println("Usuario creado correctamente: Código=" + codigo + " Nombre=" + nombre);
     }
 
