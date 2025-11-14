@@ -3,6 +3,7 @@ package biblioteca.simple.modelo;
 import biblioteca.simple.contratos.Prestable;
 import biblioteca.simple.modelo.Usuario;
 
+
 public class Videojuego extends Producto implements Prestable {
 
     private String plataforma;

@@ -1,13 +1,22 @@
 package biblioteca.simple.app;
 
 import biblioteca.simple.contratos.Prestable;
-import biblioteca.simple.modelo.*;
+import biblioteca.simple.modelo.Formato;
+import biblioteca.simple.modelo.Libro;
+import biblioteca.simple.modelo.Pelicula;
+import biblioteca.simple.modelo.Producto;
+import biblioteca.simple.modelo.Usuario;
+import biblioteca.simple.modelo.Videojuego;
 import biblioteca.simple.servicios.Catalogo;
 
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -16,10 +25,17 @@ public class Main {
     private static final Catalogo catalogo = new Catalogo();
     private static final List<Usuario> usuarios =new ArrayList<>();
     private static final Scanner sc = new Scanner(System.in);
+    private static final String RUTA_JSON = "usuarios.json";
+public static void main(String[] args) {
 
+        // 1) Intentar importar usuarios desde JSON
+        importarUsuarios();
 
-    public static void main(String[] args) {
-        cargarDatos();
+        // Si no hay usuarios en memoria, cargamos datos por defecto
+        if (usuarios.isEmpty()) {
+            cargarDatos();
+        }
+
         menu();
     }
 
@@ -29,21 +45,27 @@ public class Main {
         catalogo.alta(new Pelicula(3, "El Padrino", "1972", Formato.FISICO, "rancis Ford Coppola", 175));
         catalogo.alta(new Pelicula(4, "Parásitos", "2019", Formato.FISICO, "Bong Joon-ho", 132));
 
+        catalogo.alta(new Videojuego(5, "Super Mario", "2020", Formato.DIGITAL, "Nintendo Switch", "Aventura"));
+        catalogo.alta(new Videojuego(6, "Super Mario2", "2022", Formato.DIGITAL, "Nintendo Switch", "Aventura"));
+
+
         usuarios.add(new Usuario(1, "Juan"));
         usuarios.add(new Usuario(2, "María"));
 
     }
 
-    private static void menu(){
+private static void menu(){
         int op;
         do {
-            System.out.println("\n===Menú de Biblioteca===");
-            System.out.println("1. Listar");
+            System.out.println("\n***Menú de Biblioteca***");
+            System.out.println("1. Listar productos");
             System.out.println("2. Buscar por título");
             System.out.println("3. Buscar por año");
-            System.out.println("4. Prestar Producto");
-            System.out.println("5. Devolver Producto");
+            System.out.println("4. Prestar producto");
+            System.out.println("5. Devolver producto");
             System.out.println("6. Crear usuario");
+            System.out.println("7. Exportar usuarios a JSON");
+            System.out.println("8. Importar usuarios desde JSON");
             System.out.println("0. Salir");
 
             while(!sc.hasNextInt()) sc.next();
@@ -57,7 +79,9 @@ public class Main {
                 case 4 -> prestar();
                 case 5 -> devolver();
                 case 6 -> crearUsuarioManual();
-                case 0 -> System.out.println("Sayonara!");
+                case 7 -> exportarUsuarios();
+                case 8 -> importarUsuarios();
+                case 0 -> System.out.println("Saliendo del programa");
                 default -> System.out.println("Opción no válida");
             }
         } while(op != 0);
@@ -69,7 +93,7 @@ public class Main {
             System.out.println("Catálogo vacío");
             return;
         }
-        System.out.println("==Lista de productos ===");
+        System.out.println("Lista de productos");
         for(Producto p : lista) System.out.println("- " + p);
     }
 
@@ -91,7 +115,7 @@ public class Main {
             System.out.println("No hay usuarios registrados");
             return;
         }
-        System.out.println("Lista usuarios");
+        System.out.println("Lista de usuarios");
         usuarios.forEach(u -> System.out.println("- Código : " + u.getId() + " | Nombre: " + u.getNombre() ));
     }
 
@@ -130,19 +154,20 @@ public class Main {
         System.out.println("Usuario creado correctamente: Código=" + codigo + " Nombre=" + nombre);
     }
 
-    //Prestar (si el usuario no existe se ofrece crear en ese momento sin abortar la operación)
+//Prestar (si el usuario no existe se ofrece crear en ese momento sin abortar la operación)
     private static void prestar(){
-        //mostrar productos disponibles
+
+//mostrar productos disponibles
         List<Producto> disponibles = catalogo.listar().stream()
-                .filter(p -> p instanceof Prestable pN && !pN.estaPrestado())
-                .collect(Collectors.toList());
+            .filter(p -> p instanceof Prestable pN && !pN.estaPrestado())
+            .collect(Collectors.toList());
 
         if ( disponibles.isEmpty() ) {
             System.out.println("No hay productos para prestar");
             return;
         }
 
-        System.out.println("-- PRODUCTOS DISPONIBLES --");
+        System.out.println("*** PRODUCTOS DISPONIBLES ***");
         disponibles.forEach( p -> System.out.println("- ID: " + p.getId() + " | " + p));
 
         System.out.println("Escribe el id del producto: ");
@@ -151,9 +176,9 @@ public class Main {
         sc.nextLine();
 
         Producto pEncontrado = disponibles.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .orElse(null);
+            .filter(p -> p.getId() == id)
+            .findFirst()
+            .orElse(null);
 
         if (pEncontrado == null){
             System.out.println("El id no existe");
@@ -208,8 +233,8 @@ public class Main {
 
     public static void devolver(){
         List<Producto> pPrestados = catalogo.listar().stream()
-                .filter(p -> p instanceof Prestable pN && pN.estaPrestado())
-                .collect(Collectors.toList());
+            .filter(p -> p instanceof Prestable pN && pN.estaPrestado())
+            .collect(Collectors.toList());
 
         if ( pPrestados.isEmpty() ) {
             System.out.println("No hay productos prestados");
@@ -225,9 +250,9 @@ public class Main {
         sc.nextLine();
 
         Producto pEncontrado = pPrestados.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .orElse(null);
+            .filter(p -> p.getId() == id)
+            .findFirst()
+            .orElse(null);
 
         if (pEncontrado == null){
             System.out.println("El id no existe");
@@ -243,4 +268,34 @@ public class Main {
             System.out.println("No se pudo devolver: " + ex.getMessage());
         }
     }
+
+     private static void exportarUsuarios() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try (FileWriter fw = new FileWriter(RUTA_JSON)) {
+            gson.toJson(usuarios, fw);
+            System.out.println("Usuarios exportados correctamente a " + RUTA_JSON);
+        } catch (IOException e) {
+            System.out.println("Error al exportar usuarios: " + e.getMessage());
+        }
+    }
+
+    private static void importarUsuarios() {
+        Gson gson = new Gson();
+        File f = new File(RUTA_JSON);
+
+        if (!f.exists()) {
+            System.out.println("(Aviso) No existe usuarios.json. Se cargarán usuarios por defecto.");
+            return;
+        }
+
+        try (FileReader fr = new FileReader(f)) {
+            Usuario[] arr = gson.fromJson(fr, Usuario[].class);
+            usuarios.clear();
+            usuarios.addAll(Arrays.asList(arr));
+            System.out.println("Usuarios importados correctamente desde " + RUTA_JSON);
+        } catch (Exception e) {
+            System.out.println("Error leyendo usuarios.json: " + e.getMessage());
+        }
+    }
 }
+
