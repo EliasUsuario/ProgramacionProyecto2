@@ -61,4 +61,9 @@ public class Catalogo {
         }
         return res;
     }
+
+
+    public List<Producto> importar() {
+        return null;
+    }
 }

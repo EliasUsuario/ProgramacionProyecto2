@@ -1,120 +1,74 @@
 package biblioteca.simple.modelo;
 
 import biblioteca.simple.contratos.Prestable;
-import biblioteca.simple.modelo.Usuario;
-
 
 public class Videojuego extends Producto implements Prestable {
 
-    private String plataforma;
+    // Atributos propios de videojuego
+    private Plataforma plataforma;
     private int edadMinima;
     private String desarrolladora;
     private double tamanioGB;
 
+    // Control del estado del préstamo
     private boolean prestado;
     private Usuario prestadoA;
 
-    //Constructor desde ID
-    public Videojuego(int id, String titulo, String anho, Formato formato, String plataforma, int edadMinima,String desarrolladora, double tamanioGB) {
+    // Constructor usado cuando el objeto proviene de una base de datos
+    // (ya tiene un "id" asignado)
+    public Videojuego(int id, String titulo, String anho, Formato formato, Plataforma plataforma, int edadMinima, String desarrolladora, double tamanioGB) {
+        // Llama al constructor de la superclase Producto con "id"
         super(id, titulo, anho, formato);
-        if (edadMinima < 0) {
-            throw new IllegalArgumentException("Edad mínima no puede ser negativa");
-        }
-        if (tamanioGB <= 0) {
-            throw new IllegalArgumentException("Tamaño en GB debe ser positivo");
-        }
         this.plataforma = plataforma;
         this.edadMinima = edadMinima;
         this.desarrolladora = desarrolladora;
         this.tamanioGB = tamanioGB;
-        this.prestado = false;
-        this.prestadoA = null;
     }
 
-    //Constructor desde menú
-
-public Videojuego(String titulo, String anho, Formato formato, String plataforma, int edadMinima, String desarrolladora, double tamanioGB) {
+    //Constructor para crear un videojuego nuevo desde la aplicación
+    // (el "id" se generará después o lo asignará la BD)
+    public Videojuego(String titulo, String anho, Formato formato, Plataforma plataforma, int edadMinima, String desarrolladora, double tamanioGB) {
+        //Llama al constructor Producto que no tiene "id"
         super(titulo, anho, formato);
-        if (edadMinima < 0) {
-            throw new IllegalArgumentException("Edad mínima no puede ser negativa");
-        }
-        if (tamanioGB <= 0) {
-            throw new IllegalArgumentException("Tamaño en GB debe ser positivo");
-        }
         this.plataforma = plataforma;
         this.edadMinima = edadMinima;
         this.desarrolladora = desarrolladora;
         this.tamanioGB = tamanioGB;
-        this.prestado = false;
-        this.prestadoA = null;
     }
 
-// Getters y Setters
+    // Getters para obtener información específica del videojuego
+    public Plataforma getPlataforma() {return plataforma;}
 
-public String getPlataforma() {return plataforma;}
+    public int getEdadMinima() {return edadMinima;}
 
-public void setPlataforma(String plataforma) {this.plataforma = plataforma;}
+    public String getDesarrolladora() {return desarrolladora;}
 
-public int getEdadMinima() {return edadMinima;}
+    public double getTamanioGB() {return tamanioGB;}
 
-public void setEdadMinima(int edadMinima) {
-    if (edadMinima < 0) {
-        throw new IllegalArgumentException("Edad mínima no puede ser negativa");
-    }
-    this.edadMinima = edadMinima;
-}
-
-public String getDesarrolladora() {return desarrolladora;}
-
-public void setDesarrolladora(String desarrolladora) {this.desarrolladora = desarrolladora;}
-
-public double getTamanioGB() {return tamanioGB;}
-
-public void setTamanioGB(double tamanioGB) {
-    if (tamanioGB <= 0) {
-        throw new IllegalArgumentException("Tamaño en GB debe ser positivo");
-    }
-    this.tamanioGB = tamanioGB;
-}
-
-public boolean isPrestado() {return prestado;}
-
-public Usuario getPrestadoA() {return prestadoA;}
-
-//Implementación de Prestable
-
-@Override public void prestar(Usuario usuario) {
-        if (usuario == null) {
-            throw new IllegalArgumentException("Usuario no puede ser nulo");
-        }
-        if (this.prestado) {
-            throw new IllegalStateException("El videojuego ya está prestado.");
-        }
-        this.prestado = true;
-        this.prestadoA = usuario;
-}
-
-@Override public void devolver() {
-        if (!this.prestado) {
-            throw new IllegalStateException("El videojuego no está prestado.");
-        }
-        this.prestado = false;
-        this.prestadoA = null;
+    // Implementación del método de la interfaz Prestable
+    @Override public void prestar(Usuario u) {
+        if (prestado) throw new IllegalStateException("Ya prestado");
+        prestado = true;
+        this.prestadoA = u;
     }
 
-@Override public boolean estaPrestado() {return this.prestado;}
+    @Override public void devolver() {prestado = false; this.prestadoA = null;}
 
+    @Override public boolean estaPrestado() {return prestado;}
 
-//toString
-
-@Override public String toString() {
-        return " Videojuego{" +
-            "plataforma='" + plataforma + '\'' +
-            ", edadMinima=" + edadMinima +
-            ", desarrolladora='" + desarrolladora + '\'' +
-            ", tamanioGB=" + tamanioGB +
-            ", prestado=" + prestado +
-            (prestado ? ", prestadoA=" + prestadoA : "") +
-            '}';
+    // Sobrescribimos toString() para representar toda la información
+    // del videojuego en forma de texto (útil al imprimir por consola)
+    @Override public String toString() {
+        return  "Videojuego{" +
+                "id=" + id +
+                ", titulo='" + titulo + "'" +
+                ", anho=" + anho +
+                ", formato=" + formato +
+                ", plataforma=" + plataforma +
+                ", edadMinima=" + edadMinima +
+                ", desarrolladora=" + desarrolladora +
+                ", tamanioGB=" + tamanioGB +
+                "}";
     }
+
 }
