@@ -68,7 +68,6 @@ public class Main {
             while(!sc.hasNextInt()) sc.next();
             op = sc.nextInt();
             sc.nextLine();
-            sc.close(); //Cierre del scanner
 
             switch (op){
                 case 1 -> listar();
